@@ -16,12 +16,12 @@
 
 package fi.harism.curl;
 
+import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -39,7 +39,13 @@ import android.view.View;
 public class CurlActivity extends Activity {
 
     private static final String TAG = "test";
+    CurlHelper mCurlHelper = new CurlHelper();
     private CurlView mCurlView;
+    private MultiTouchImageView mTouchImageView;
+
+    private int[] mBitmapIds = {R.drawable.obama, R.drawable.road_rage,
+            R.drawable.taipei_101, R.drawable.world};
+    int mIndex = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,11 +58,13 @@ public class CurlActivity extends Activity {
         }
         mCurlView = (CurlView) findViewById(R.id.curl);
         mCurlView.setPageProvider(new PageProvider());
-//        final TouchDrawable touchDrawable = new TouchDrawable(mCurlView);
-//        mCurlView.setPageProvider(touchDrawable);
-        mCurlView.setSizeChangedObserver(new SizeChangedObserver());
-        mCurlView.setCurrentIndex(index);
-        mCurlView.setBackgroundColor(0xFF202830);
+////        final TouchDrawable touchDrawable = new TouchDrawable(mCurlView);
+////        mCurlView.setPageProvider(touchDrawable);
+////        mCurlView.setSizeChangedObserver(new SizeChangedObserver());
+//        mCurlView.setCurrentIndex(index);
+//        mCurlView.setBackgroundColor(Color.TRANSPARENT);
+
+//        mCurlView.setBackgroundColor(0xFF202830);
 //        mCurlView.post(new Runnable() {
 //            @Override
 //            public void run() {
@@ -67,6 +75,9 @@ public class CurlActivity extends Activity {
         // This is something somewhat experimental. Before uncommenting next
         // line, please see method comments in CurlView.
         // mCurlView.setEnableTouchPressure(true);
+
+        mTouchImageView = (MultiTouchImageView) findViewById(R.id.image_view);
+        mTouchImageView.setDrawable(getDrawable(R.drawable.obama));
     }
 
     public void onButton(View view) {
@@ -79,6 +90,7 @@ public class CurlActivity extends Activity {
 //        mCurlView.setCurrentIndex(currentIndex);
 //        mCurlView.startCurl(2);
 
+        mCurlView.setCurrentIndex(mIndex);
 
         final int measuredWidth = mCurlView.getMeasuredWidth();
         final int measuredHeight = mCurlView.getMeasuredHeight();
@@ -106,26 +118,73 @@ public class CurlActivity extends Activity {
                 }
             }
         });
-        animator.setDuration(4000);
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mIndex++;
+                mIndex = mIndex % mBitmapIds.length;
+                mTouchImageView.setDrawable(getDrawable(mBitmapIds[mIndex]));
+                mTouchImageView.animate().alpha(1f).setDuration(300).start();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        animator.setDuration(1000);
         animator.start();
+        mTouchImageView.animate().alpha(0f).setDuration(300).start();
+
+//        if (mCurlHelper.isStart()) {
+//            return;
+//        }
+//
+////        CurlHelper.startCurl((ViewGroup) findViewById(R.id.layout));
+//        mCurlHelper.initCurlView((ViewGroup) findViewById(R.id.layout));
+//        mTouchImageView.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                mTouchImageView.animate().alpha(0f).setDuration(300).start();
+//                mCurlHelper.startCurl(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        mTouchImageView.setDrawable(getDrawable(R.drawable.road_rage));
+//                        mTouchImageView.setAlpha(1f);
+////                        mTouchImageView.animate().alpha(1f).setDuration(300).start();
+//                    }
+//                });
+//            }
+//        }, 100);
+
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mCurlView.onPause();
+//        mCurlView.onPause();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mCurlView.onResume();
+//        mCurlView.onResume();
     }
 
-    @Override
-    public Object onRetainNonConfigurationInstance() {
-        return mCurlView.getCurrentIndex();
-    }
+//    @Override
+//    public Object onRetainNonConfigurationInstance() {
+//        return mCurlView.getCurrentIndex();
+//    }
 
     /**
      * Bitmap provider.
@@ -144,10 +203,11 @@ public class CurlActivity extends Activity {
 
         private Bitmap loadBitmap(int width, int height, int index) {
             Log.i(TAG, "loadBitmap: " + index);
-            Bitmap b = Bitmap.createBitmap(width, height,
+            Bitmap b
+                    = Bitmap.createBitmap(width, height,
                     Bitmap.Config.ARGB_8888);
 //			b.eraseColor(0xFFFFFFFF);
-            b.eraseColor(Color.BLACK);
+//            b.eraseColor(Color.BLACK);
             Canvas c = new Canvas(b);
             Drawable d = getResources().getDrawable(mBitmapIds[index]);
 
@@ -170,17 +230,18 @@ public class CurlActivity extends Activity {
             r.bottom = r.top + imageHeight + border + border;
 
             Paint p = new Paint();
-            p.setColor(0xFFC0C0C0);
-            c.drawRect(r, p);
+//            p.setColor(0xFFC0C0C0);
+//            c.drawRect(r, p);
             r.left += border;
             r.right -= border;
             r.top += border;
             r.bottom -= border;
-            d.setBounds(width / 2 - d.getIntrinsicWidth() / 2, height / 2 - d.getIntrinsicHeight() / 2,
-                    width / 2 + d.getIntrinsicWidth() / 2, height / 2 + d.getIntrinsicHeight() / 2);
+//            d.setBounds(width / 2 - d.getIntrinsicWidth() / 2, height / 2 - d.getIntrinsicHeight() / 2,
+//                    width / 2 + d.getIntrinsicWidth() / 2, height / 2 + d.getIntrinsicHeight() / 2);
 //			d.setBounds(r);
 //            c.concat(mMatrix);
-            c.drawColor(Color.RED);
+//            c.drawColor(Color.RED);
+            d.setBounds(0, 0, width, height);
             d.draw(c);
 
             return b;
@@ -239,7 +300,6 @@ public class CurlActivity extends Activity {
             }
         }
 
-        @Override
         public boolean onTouch(MotionEvent event) {
             mMatrix.setScale(2, 2);
             return true;

@@ -914,8 +914,6 @@ public class CurlView extends GLSurfaceView implements View.OnTouchListener,
          * Index is a number between 0 and getBitmapCount() - 1.
          */
         public void updatePage(CurlPage page, int width, int height, int index);
-
-        public boolean onTouch(MotionEvent event);
     }
 
     /**

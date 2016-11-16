@@ -94,7 +94,6 @@ public class TouchDrawable implements CurlView.PageProvider {
         return b;
     }
 
-    @Override
     public boolean onTouch(MotionEvent event) {
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN://第一个手指按下
